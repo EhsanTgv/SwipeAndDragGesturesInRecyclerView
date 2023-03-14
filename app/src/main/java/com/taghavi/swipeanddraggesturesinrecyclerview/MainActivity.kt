@@ -10,6 +10,7 @@ import android.util.TypedValue
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -103,7 +104,33 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        dragHelper = ItemTouchHelper(object :
+            ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                viewHolder.itemView.elevation = 16f
+
+                val from = viewHolder.adapterPosition
+                val to = target.adapterPosition
+
+                Collections.swap(list, from, to)
+                adapter.notifyItemMoved(from, to)
+                return true
+            }
+
+            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                super.onSelectedChanged(viewHolder, actionState)
+                viewHolder?.itemView?.elevation = 0f
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+        })
+
         swipeHelper.attachToRecyclerView(rvList)
+        dragHelper.attachToRecyclerView(rvList)
     }
 
     fun startDragging(holder: RecyclerView.ViewHolder) {
